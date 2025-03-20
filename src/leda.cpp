@@ -177,13 +177,13 @@ iter:
 }
 
 
-void Row_wise_Unit_Merge(ap_uint<14> B_row,
-                         ap_uint<14> B_row_old,
-                         ap_uint<32> A_val,
-                         VALUE_TYPE Matrix_B_onchip[8][Tile_WIDTH],
-                         VALUE_TYPE Matrix_B_flxreg[8],
-                         VALUE_TYPE_v8 & val
-                        ) {
+void Outer_Product_Unit_Merge(ap_uint<14> B_row,
+                              ap_uint<14> B_row_old,
+                              ap_uint<32> A_val,
+                              VALUE_TYPE Matrix_B_onchip[8][Tile_WIDTH],
+                              VALUE_TYPE Matrix_B_flxreg[8],
+                              VALUE_TYPE_v8 & val
+                             ) {
 #pragma HLS inline
     VALUE_TYPE A_val_float = tapa::bit_cast<VALUE_TYPE>(A_val);
     if(B_row_old & B_row == 0x3FFF) {
@@ -313,13 +313,13 @@ iter:
                         mult_val.row = a_row;
 
                         if (a_row[17] == 0) {
-                            Row_wise_Unit_Merge(a_col,
-                                                col_old[p],
-                                                a_val,
-                                                Matrix_B_onchip[p/2],
-                                                Matrix_B_flxreg[p],
-                                                mult_val.val
-                                                );
+                            Outer_Product_Unit_Merge(a_col,
+                                                     col_old[p],
+                                                     a_val,
+                                                     Matrix_B_onchip[p/2],
+                                                     Matrix_B_flxreg[p],
+                                                     mult_val.val
+                                                    );
                         }
                         Matrix_Mult_Matrix_Stream[p].write(mult_val);
                     }
