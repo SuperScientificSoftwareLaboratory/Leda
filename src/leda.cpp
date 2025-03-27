@@ -181,20 +181,20 @@ void Outer_Product_Unit_Merge(ap_uint<14> B_row,
                               ap_uint<14> B_row_old,
                               ap_uint<32> A_val,
                               VALUE_TYPE Matrix_B_onchip[8][Tile_WIDTH],
-                              VALUE_TYPE Matrix_B_flxreg[8],
+                              VALUE_TYPE Matrix_B_reusequeue[8],
                               VALUE_TYPE_v8 & val
                              ) {
 #pragma HLS inline
     VALUE_TYPE A_val_float = tapa::bit_cast<VALUE_TYPE>(A_val);
     if(B_row_old & B_row == 0x3FFF) {
         for(INDEX_TYPE i = 0; i < 8; ++i) {
-            val[i] = A_val_float * Matrix_B_flxreg[i];
+            val[i] = A_val_float * Matrix_B_reusequeue[i];
         }
     }
     else{
         for(INDEX_TYPE i = 0; i < 8; ++i) {
             val[i] = A_val_float * Matrix_B_onchip[i][B_row];
-            Matrix_B_flxreg[i] = Matrix_B_onchip[i][B_row];
+            Matrix_B_reusequeue[i] = Matrix_B_onchip[i][B_row];
         }
     }
     B_row_old = B_row;
@@ -292,10 +292,10 @@ iter:
                 for(INDEX_TYPE col = 0; col < 4; ++col) {
                     col_old[col] = 0x3FFF;
                 }
-                VALUE_TYPE Matrix_B_flxreg[4][8]; 
-#pragma HLS bind_storage variable=Matrix_B_flxreg latency=2
-#pragma HLS array_partition variable=Matrix_B_flxreg complete dim=1
-#pragma HLS array_partition variable=Matrix_B_flxreg complete dim=2
+                VALUE_TYPE Matrix_B_reusequeue[4][8]; 
+#pragma HLS bind_storage variable=Matrix_B_reusequeue latency=2
+#pragma HLS array_partition variable=Matrix_B_reusequeue complete dim=1
+#pragma HLS array_partition variable=Matrix_B_reusequeue complete dim=2
 
                 bool a_pes_ready = Matrix_A_Stream_256.try_read(a_pes);
                 
@@ -317,7 +317,7 @@ iter:
                                                      col_old[p],
                                                      a_val,
                                                      Matrix_B_onchip[p/2],
-                                                     Matrix_B_flxreg[p],
+                                                     Matrix_B_reusequeue[p],
                                                      mult_val.val
                                                     );
                         }
